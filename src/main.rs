@@ -15,7 +15,14 @@ fn main() -> Result<()> {
     let isatty: bool = atty::is(atty::Stream::Stdout);
     let color_flag: bool = config.color_when.mix_isatty_to_color_flag(isatty);
 
-    let colorizer = app::Colorizer::new();
+    let mut colorizer = app::Colorizer::new();
+    colorizer
+        .load_config_file("config.yaml")
+        .unwrap_or_else(|err| {
+            eprintln!("Problem while reading files: {}", err);
+            process::exit(1);
+        });
+    colorizer.setup();
     let line_parse_func = |outfile: &mut Box<dyn std::io::Write>, nr: i32, s: &String| -> bool {
         let output_flag = config.base_line <= 0
             || config.base_line - config.line_context <= nr

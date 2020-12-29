@@ -1,6 +1,11 @@
 use regex::Regex;
 use std::io::{BufWriter, Write};
 
+use anyhow::Result;
+
+use serde::Deserializer;
+use serde::{Deserialize, Serialize};
+
 pub struct ColorPatternMap {
     pub name: String,
     pub pattern: String,
@@ -60,83 +65,114 @@ pub fn process_color_pattern_maps(s: &str, patterns: &[ColorPatternMap]) -> Stri
 }
 
 pub struct Colorizer {
+    color_pattern_map_data_list: Vec<ColorPatternMapTemplate>,
     pub color_pattern_maps: Vec<ColorPatternMap>,
 }
 
-impl Colorizer {
-    pub fn new() -> Self {
-        struct ColorPatternMapTemplate {
-            name: String,
-            patterns: Vec<String>,
-            color: ansi_term::Colour,
+pub struct ColorSet {
+    name: String,
+    color: ansi_term::Colour,
+}
+impl ColorSet {
+    pub fn new(name: &str) -> Self {
+        let color = match name {
+            name if name.starts_with("#") => {
+                let r = u8::from_str_radix(&name[1..3], 16).unwrap();
+                let g = u8::from_str_radix(&name[3..5], 16).unwrap();
+                let b = u8::from_str_radix(&name[5..7], 16).unwrap();
+                ansi_term::Color::RGB(r, g, b)
+            }
+            name if name.parse::<i32>().is_ok() => ansi_term::Color::Fixed(name.parse().unwrap()),
+            _ => ansi_term::Color::Fixed(7),
         };
+        let color_set = ColorSet {
+            name: name.to_string(),
+            color: color,
+        };
+        return color_set;
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+struct ColorPatternMapTemplate {
+    name: String,
+    patterns: Vec<String>,
+    #[serde(rename = "color")]
+    color_set: ColorSet,
+}
+
+use serde::ser::SerializeStruct;
+impl Serialize for ColorSet {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        format!("{}", self.name).serialize(serializer)
+    }
+}
+
+impl<'de> Deserialize<'de> for ColorSet {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        let color_set = ColorSet::new(&s);
+        print!("{:?}", color_set.name);
+        Ok(color_set)
+    }
+}
+
+impl Colorizer {
+    pub fn load_config_file(&mut self, filepath: &str) -> Result<(), Box<dyn std::error::Error>> {
+        let f = std::fs::File::open(filepath)?;
+        let mut color_pattern_map_data_list: Vec<ColorPatternMapTemplate> =
+            serde_yaml::from_reader(f)?;
+        self.color_pattern_map_data_list
+            .append(&mut color_pattern_map_data_list);
+        // for debug
+        // let yaml_str = serde_yaml::to_string(&self.color_pattern_map_data_list).unwrap();
+        // println!("Serialized yaml = {:?}", yaml_str);
+        Ok(())
+    }
+    pub fn new() -> Self {
         let color_pattern_map_data_list: Vec<ColorPatternMapTemplate> = vec![
-            ColorPatternMapTemplate {
-                name: String::from("ip_addr"),
-                patterns: vec![
-                    r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}", // TODO: add ipv6
-                ]
-                .into_iter()
-                .map(String::from)
-                .collect(),
-                color: ansi_term::Colour::Fixed(228),
-            },
-            ColorPatternMapTemplate {
-                name: String::from("filepath"),
-                patterns: vec![r"(\.[0-9a-zA-Z~\-_/.]+)|([0-9a-zA-Z~\-_/.]+\.[0-9a-zA-Z~\-_]+)"]
-                    .into_iter()
-                    .map(String::from)
-                    .collect(),
-                color: ansi_term::Colour::Fixed(78),
-            },
-            ColorPatternMapTemplate {
-                name: String::from("warnings"),
-                patterns: vec!["tmp", "fix"].into_iter().map(String::from).collect(),
-                color: ansi_term::Colour::Fixed(209),
-            },
-            ColorPatternMapTemplate {
-                name: String::from("hex"),
-                patterns: vec![r"0x[0-9a-fA-F]+"]
-                    .into_iter()
-                    .map(String::from)
-                    .collect(),
-                color: ansi_term::Colour::White,
-            },
-            ColorPatternMapTemplate {
-                name: String::from("word"), // for preventing match en0 to "en" and "0" after "number" match
-                patterns: vec![r"(([a-zA-Z_]+[0-9]+)|([0-9]+[a-zA-Z_]+))[0-9a-zA-Z_]*"]
-                    .into_iter()
-                    .map(String::from)
-                    .collect(),
-                color: ansi_term::Colour::Fixed(32), // blue
-            },
-            ColorPatternMapTemplate {
-                name: String::from("number"),
-                patterns: vec![r"[0-9]+", r"0x[0-9a-fA-F]+"]
-                    .into_iter()
-                    .map(String::from)
-                    .collect(),
-                color: ansi_term::Colour::White,
-            },
-            ColorPatternMapTemplate {
+            // e.g.
+            // ColorPatternMapTemplate {
+            //     name: String::from("ip_addr"),
+            //     patterns: vec![
+            //         r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}",
+            //     ]
+            //     .into_iter()
+            //     .map(String::from)
+            //     .collect(),
+            //     color_set: ColorSet::new("228"),
+            // },
+        ];
+
+        let color_pattern_maps: Vec<ColorPatternMap> = vec![];
+        let colorizer = Colorizer {
+            color_pattern_map_data_list,
+            color_pattern_maps,
+        };
+        return colorizer;
+    }
+    pub fn setup(&mut self) {
+        self.color_pattern_map_data_list
+            .push(ColorPatternMapTemplate {
                 name: String::from("default"),
                 patterns: vec![r".+"].into_iter().map(String::from).collect(),
-                color: ansi_term::Colour::Fixed(32), // blue
-            },
-        ];
-        let mut color_pattern_maps: Vec<ColorPatternMap> = vec![];
-        for color_pattern_map_data in color_pattern_map_data_list {
+                color_set: ColorSet::new("32"),
+            });
+        for color_pattern_map_data in self.color_pattern_map_data_list.iter() {
             let pattern = color_pattern_map_data.patterns.join("|");
             let m = ColorPatternMap::new(
                 &color_pattern_map_data.name,
                 &pattern,
-                color_pattern_map_data.color,
+                color_pattern_map_data.color_set.color,
             );
-            color_pattern_maps.push(m);
+            self.color_pattern_maps.push(m);
         }
-
-        let colorizer = Colorizer { color_pattern_maps };
-        return colorizer;
     }
     pub fn colorize(&self, s: &str) -> String {
         return process_color_pattern_maps(s, &self.color_pattern_maps);

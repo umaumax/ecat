@@ -1,0 +1,30 @@
+- name: text
+  patterns: ["\"[^\"]*\"", "'[^\']*'"]
+  color: "#ffff5f"
+- name: ip_addr
+  patterns: ["[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}"] # TODO: add ipv6
+  color: "228"
+- name: filepath
+  patterns: ["(\\.[0-9a-zA-Z~\\-_/.]+)|([0-9a-zA-Z~\\-_/.]+\\.[0-9a-zA-Z~\\-_]+)"]
+  color: "78"
+- name: size
+  patterns: ["KB", "MB"]
+  color: "#00ff00"
+- name: googletest
+  patterns: ["[TODO FAIL]", "[ OK ]"]
+  color: "#00ff00"
+- name: type
+  patterns: ["int", "float"]
+  color: "30"
+- name: warnings
+  patterns: ["tmp", "fix"]
+  color: "209"
+- name: hex
+  patterns: ["0x[0-9a-fA-F]+"]
+  color: "1"
+- name: word
+  patterns: ["(([a-zA-Z_]+[0-9]+)|([0-9]+[a-zA-Z_]+))[0-9a-zA-Z_]*"]
+  color: "32"
+- name: number
+  patterns: ["[0-9]+", "0x[0-9a-fA-F]+"]
+  color: "1"

@@ -59,76 +59,86 @@ pub fn process_color_pattern_maps(s: &str, patterns: &[ColorPatternMap]) -> Stri
     return output;
 }
 
-pub fn colorize(s: &str) -> String {
-    struct ColorPatternMapTemplate {
-        name: String,
-        patterns: Vec<String>,
-        color: ansi_term::Colour,
-    };
-    let color_pattern_map_data_list: Vec<ColorPatternMapTemplate> = vec![
-        ColorPatternMapTemplate {
-            name: String::from("ip_addr"),
-            patterns: vec![
-                r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}", // TODO: add ipv6
-            ]
-            .into_iter()
-            .map(String::from)
-            .collect(),
-            color: ansi_term::Colour::Fixed(228),
-        },
-        ColorPatternMapTemplate {
-            name: String::from("filepath"),
-            patterns: vec![r"(\.[0-9a-zA-Z~\-_/.]+)|([0-9a-zA-Z~\-_/.]+\.[0-9a-zA-Z~\-_]+)"]
-                .into_iter()
-                .map(String::from)
-                .collect(),
-            color: ansi_term::Colour::Fixed(78),
-        },
-        ColorPatternMapTemplate {
-            name: String::from("warnings"),
-            patterns: vec!["tmp", "fix"].into_iter().map(String::from).collect(),
-            color: ansi_term::Colour::Fixed(209),
-        },
-        ColorPatternMapTemplate {
-            name: String::from("hex"),
-            patterns: vec![r"0x[0-9a-fA-F]+"]
-                .into_iter()
-                .map(String::from)
-                .collect(),
-            color: ansi_term::Colour::White,
-        },
-        ColorPatternMapTemplate {
-            name: String::from("word"), // for preventing match en0 to "en" and "0" after "number" match
-            patterns: vec![r"(([a-zA-Z_]+[0-9]+)|([0-9]+[a-zA-Z_]+))[0-9a-zA-Z_]*"]
-                .into_iter()
-                .map(String::from)
-                .collect(),
-            color: ansi_term::Colour::Fixed(32), // blue
-        },
-        ColorPatternMapTemplate {
-            name: String::from("number"),
-            patterns: vec![r"[0-9]+", r"0x[0-9a-fA-F]+"]
-                .into_iter()
-                .map(String::from)
-                .collect(),
-            color: ansi_term::Colour::White,
-        },
-        ColorPatternMapTemplate {
-            name: String::from("default"),
-            patterns: vec![r".+"].into_iter().map(String::from).collect(),
-            color: ansi_term::Colour::Fixed(32), // blue
-        },
-    ];
+pub struct Colorizer {
+    pub color_pattern_maps: Vec<ColorPatternMap>,
+}
 
-    let mut color_pattern_maps: Vec<ColorPatternMap> = vec![];
-    for color_pattern_map_data in color_pattern_map_data_list {
-        let pattern = color_pattern_map_data.patterns.join("|");
-        let m = ColorPatternMap::new(
-            &color_pattern_map_data.name,
-            &pattern,
-            color_pattern_map_data.color,
-        );
-        color_pattern_maps.push(m);
+impl Colorizer {
+    pub fn new() -> Self {
+        struct ColorPatternMapTemplate {
+            name: String,
+            patterns: Vec<String>,
+            color: ansi_term::Colour,
+        };
+        let color_pattern_map_data_list: Vec<ColorPatternMapTemplate> = vec![
+            ColorPatternMapTemplate {
+                name: String::from("ip_addr"),
+                patterns: vec![
+                    r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}", // TODO: add ipv6
+                ]
+                .into_iter()
+                .map(String::from)
+                .collect(),
+                color: ansi_term::Colour::Fixed(228),
+            },
+            ColorPatternMapTemplate {
+                name: String::from("filepath"),
+                patterns: vec![r"(\.[0-9a-zA-Z~\-_/.]+)|([0-9a-zA-Z~\-_/.]+\.[0-9a-zA-Z~\-_]+)"]
+                    .into_iter()
+                    .map(String::from)
+                    .collect(),
+                color: ansi_term::Colour::Fixed(78),
+            },
+            ColorPatternMapTemplate {
+                name: String::from("warnings"),
+                patterns: vec!["tmp", "fix"].into_iter().map(String::from).collect(),
+                color: ansi_term::Colour::Fixed(209),
+            },
+            ColorPatternMapTemplate {
+                name: String::from("hex"),
+                patterns: vec![r"0x[0-9a-fA-F]+"]
+                    .into_iter()
+                    .map(String::from)
+                    .collect(),
+                color: ansi_term::Colour::White,
+            },
+            ColorPatternMapTemplate {
+                name: String::from("word"), // for preventing match en0 to "en" and "0" after "number" match
+                patterns: vec![r"(([a-zA-Z_]+[0-9]+)|([0-9]+[a-zA-Z_]+))[0-9a-zA-Z_]*"]
+                    .into_iter()
+                    .map(String::from)
+                    .collect(),
+                color: ansi_term::Colour::Fixed(32), // blue
+            },
+            ColorPatternMapTemplate {
+                name: String::from("number"),
+                patterns: vec![r"[0-9]+", r"0x[0-9a-fA-F]+"]
+                    .into_iter()
+                    .map(String::from)
+                    .collect(),
+                color: ansi_term::Colour::White,
+            },
+            ColorPatternMapTemplate {
+                name: String::from("default"),
+                patterns: vec![r".+"].into_iter().map(String::from).collect(),
+                color: ansi_term::Colour::Fixed(32), // blue
+            },
+        ];
+        let mut color_pattern_maps: Vec<ColorPatternMap> = vec![];
+        for color_pattern_map_data in color_pattern_map_data_list {
+            let pattern = color_pattern_map_data.patterns.join("|");
+            let m = ColorPatternMap::new(
+                &color_pattern_map_data.name,
+                &pattern,
+                color_pattern_map_data.color,
+            );
+            color_pattern_maps.push(m);
+        }
+
+        let colorizer = Colorizer { color_pattern_maps };
+        return colorizer;
     }
-    return process_color_pattern_maps(s, &color_pattern_maps);
+    pub fn colorize(&self, s: &str) -> String {
+        return process_color_pattern_maps(s, &self.color_pattern_maps);
+    }
 }

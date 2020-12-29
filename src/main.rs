@@ -1,12 +1,11 @@
 use std::env;
 use std::io;
 use std::io::{BufWriter, Write};
-use std::ops::Fn;
 use std::process;
 
 use anyhow::{Context, Result};
 
-use ecat::app::colorize;
+use ecat::app;
 use ecat::config;
 use ecat::file;
 
@@ -16,6 +15,7 @@ fn main() -> Result<()> {
     let isatty: bool = atty::is(atty::Stream::Stdout);
     let color_flag: bool = config.color_when.mix_isatty_to_color_flag(isatty);
 
+    let colorizer = app::Colorizer::new();
     let line_parse_func = |outfile: &mut Box<dyn std::io::Write>, nr: i32, s: &String| -> bool {
         let output_flag = config.base_line <= 0
             || config.base_line - config.line_context <= nr
@@ -31,7 +31,7 @@ fn main() -> Result<()> {
                 outfile
                     .write((format!("{}{:>6} ", prefix, nr)).as_bytes())
                     .unwrap();
-                let output = colorize(s);
+                let output = colorizer.colorize(s);
                 outfile.write(output.as_bytes()).unwrap();
                 outfile.write((format!("{}", suffix)).as_bytes()).unwrap();
             }

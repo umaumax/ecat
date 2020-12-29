@@ -1,30 +1,58 @@
 - name: text
   patterns: ["\"[^\"]*\"", "'[^\']*'"]
   color: "#ffff5f"
+- name: url
+  patterns: ["[a-zA-z]+://[0-9a-zA-z._/]+"]
+  color: "175"
+- name: mac_addr
+  patterns: ["[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}"]
+  color: "120"
+- name: mail
+  patterns: ["[0-9a-zA-Z]+@[0-9a-zA-Z]+\\.[0-9a-zA-Z]+"]
+  color: "141"
+- name: time
+  patterns: ["[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}"]
+  color: "51"
 - name: ip_addr
   patterns: ["[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}"] # TODO: add ipv6
   color: "228"
+- name: percent
+  patterns: ["[0-9]+%", "[0-9]+\\.[0-9]*%"]
+  color: "193"
+- name: func
+  patterns: ["[0-9a-zA-Z_]+\\([^)]*\\)"]
+  color: "77"
 - name: filepath
-  patterns: ["(\\.[0-9a-zA-Z~\\-_/.]+)|([0-9a-zA-Z~\\-_/.]+\\.[0-9a-zA-Z~\\-_]+)"]
+  patterns: ["(\\.[0-9a-zA-Z~\\-_/.]+)|([0-9a-zA-Z~\\-_/.]+\\.[0-9a-zA-Z~\\-_]+)", "/+[0-9a-zA-Z~\\-_/.]+"]
   color: "78"
 - name: size
-  patterns: ["KB", "MB"]
+  patterns: ["KB", "MB", "GB", "Ki", "Mi", "Gi"]
   color: "#00ff00"
-- name: googletest
-  patterns: ["[TODO FAIL]", "[ OK ]"]
-  color: "#00ff00"
+# - name: googletest
+#   patterns: ["[TODO FAIL]", "[ TODO OK ]"]
+#   color: "#00ff00"
 - name: type
-  patterns: ["int", "float"]
+  patterns: ["int", "float", "string", "double"]
   color: "30"
 - name: warnings
-  patterns: ["tmp", "fix"]
+  patterns: ["modified", "add", "restore", "change"]
+  color: "125"
+  modified:
+- name: warnings
+  patterns: ["tmp", "fix", "wip", "todo", "comment"]
   color: "209"
+- name: keyword
+  patterns: ["get", "set", "class", "private", "public", "protected"]
+  color: "46"
 - name: hex
   patterns: ["0x[0-9a-fA-F]+"]
-  color: "1"
+  color: "197"
 - name: word
   patterns: ["(([a-zA-Z_]+[0-9]+)|([0-9]+[a-zA-Z_]+))[0-9a-zA-Z_]*"]
-  color: "32"
+  color: "195"
 - name: number
   patterns: ["[0-9]+", "0x[0-9a-fA-F]+"]
-  color: "1"
+  color: "39"
+- name: default
+  patterns: [".*"]
+  color: "195"

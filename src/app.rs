@@ -161,7 +161,7 @@ impl Colorizer {
             .push(ColorPatternMapTemplate {
                 name: String::from("default"),
                 patterns: vec![r".+"].into_iter().map(String::from).collect(),
-                color_set: ColorSet::new("32"),
+                color_set: ColorSet::new("15"),
             });
         for color_pattern_map_data in self.color_pattern_map_data_list.iter() {
             let pattern = color_pattern_map_data.patterns.join("|");

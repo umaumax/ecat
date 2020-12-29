@@ -118,7 +118,6 @@ impl<'de> Deserialize<'de> for ColorSet {
     {
         let s = String::deserialize(deserializer)?;
         let color_set = ColorSet::new(&s);
-        print!("{:?}", color_set.name);
         Ok(color_set)
     }
 }

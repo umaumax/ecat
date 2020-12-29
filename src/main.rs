@@ -66,7 +66,7 @@ fn main() -> Result<()> {
 }
 
 fn write_lines<F>(
-    r: &mut std::io::BufRead,
+    r: &mut dyn std::io::BufRead,
     w: &mut Box<dyn std::io::Write>,
     f: F,
 ) -> Result<(), io::Error>

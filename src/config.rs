@@ -45,7 +45,7 @@ pub fn parse_arg() -> Result<Config> {
         .with_context(|| format!("failed parse --color option"))?;
     let config_file = matches.value_of("config").unwrap_or("").to_string();
     let line_number = matches.is_present("n");
-    let mut files: Vec<String> = matches
+    let files: Vec<String> = matches
         .values_of("files")
         .unwrap()
         .map(String::from)

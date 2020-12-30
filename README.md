@@ -3,7 +3,7 @@
 enhanced cat
 
 ## how to install
-```
+``` bash
 cargo install --git https://github.com/umaumax/ecat
 ```
 
@@ -12,8 +12,9 @@ cargo install --git https://github.com/umaumax/ecat
 
 ## how to run
 e.g.
-```
+``` bash
 ifconfig | ecat
+df | ecat
 ```
 
 ## config file
@@ -32,3 +33,6 @@ e.g.
 ```
 
 color code: [https://upload\.wikimedia\.org/wikipedia/commons/1/15/Xterm\_256color\_chart\.svg]( https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.svg )
+
+## TODO
+[ ] create test code

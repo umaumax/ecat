@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io;
 use std::io::BufReader;
+use std::time::Instant;
 
 use anyhow::Result;
 
@@ -35,6 +36,9 @@ where
 {
     let mut s = String::new();
     let mut nr = 1;
+
+    let flush_timeout_th = 200;
+    let mut start = Instant::now();
     loop {
         match r.read_line(&mut s) {
             Ok(0) => break, // EOF
@@ -43,6 +47,11 @@ where
                 s.clear();
                 if !ret {
                     break;
+                }
+                let now = start.elapsed();
+                if now.as_millis() >= flush_timeout_th {
+                    w.flush().unwrap();
+                    start = Instant::now();
                 }
             }
             Err(err) => return Err(err),

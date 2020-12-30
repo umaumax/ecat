@@ -1,8 +1,7 @@
-use regex::Regex;
 use std::io::{BufWriter, Write};
 
 use anyhow::Result;
-
+use regex::Regex;
 use serde::Deserializer;
 use serde::{Deserialize, Serialize};
 

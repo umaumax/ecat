@@ -65,9 +65,10 @@ fn main() -> Result<()> {
                 prefix = "\x1b[32m"; // NOTE: green
                 suffix = "\x1b[m";
             }
-            outfile
-                .write((format!("{}{:>6} ", prefix, nr)).as_bytes())
-                .unwrap();
+            outfile.write((format!("{}", prefix)).as_bytes()).unwrap();
+            if config.line_number {
+                outfile.write((format!("{:>6} ", nr)).as_bytes()).unwrap();
+            }
             if color_flag {
                 let output = colorizer.colorize(s);
                 outfile.write(output.as_bytes()).unwrap();

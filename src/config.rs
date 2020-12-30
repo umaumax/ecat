@@ -25,6 +25,7 @@ pub struct Config {
     pub line_context: i32,
     pub color_when: ColorWhen,
     pub config_file: String,
+    pub line_number: bool,
     pub files: Vec<String>,
 }
 
@@ -43,6 +44,7 @@ pub fn parse_arg() -> Result<Config> {
     let color_when = ColorWhen::from_str(matches.value_of("color").unwrap_or("auto"))
         .with_context(|| format!("failed parse --color option"))?;
     let config_file = matches.value_of("config").unwrap_or("").to_string();
+    let line_number = matches.is_present("n");
     let mut files: Vec<String> = matches
         .values_of("files")
         .unwrap()
@@ -57,6 +59,7 @@ pub fn parse_arg() -> Result<Config> {
         line_context,
         color_when,
         config_file,
+        line_number,
         files,
     };
     return Ok(config);
@@ -92,6 +95,10 @@ pub fn build_app() -> clap::App<'static, 'static> {
         .arg(clap::Arg::from_usage(
             "--config=[STRING] \
             'set config filepath;",
+        ))
+        .arg(clap::Arg::from_usage(
+            "-n \
+            'number the output lines, starting at 1.",
         ))
         .arg(
             clap::Arg::with_name("files")

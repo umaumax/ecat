@@ -27,11 +27,11 @@ pub fn get_buf_reader_safe(file: &str) -> Result<BufReader<Box<dyn std::io::Read
 
 pub fn write_lines<F>(
     r: &mut dyn std::io::BufRead,
-    w: &mut Box<dyn std::io::Write>,
+    w: &mut dyn std::io::Write,
     f: F,
 ) -> Result<(), io::Error>
 where
-    F: Fn(&mut Box<dyn std::io::Write>, i32, &String) -> bool,
+    F: Fn(&mut dyn std::io::Write, i32, &String) -> bool,
 {
     let mut s = String::new();
     let mut nr = 1;

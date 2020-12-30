@@ -2,7 +2,7 @@ use std::env;
 use std::error::Error;
 use std::fmt;
 use std::io;
-use std::io::{BufWriter, Write};
+use std::io::BufWriter;
 use std::path::Path;
 use std::process;
 
@@ -54,7 +54,7 @@ fn main() -> Result<()> {
         });
 
     colorizer.setup();
-    let line_parse_func = |outfile: &mut Box<dyn std::io::Write>, nr: i32, s: &String| -> bool {
+    let line_parse_func = |outfile: &mut dyn std::io::Write, nr: i32, s: &String| -> bool {
         let output_flag = config.base_line <= 0
             || config.base_line - config.line_context <= nr
                 && nr <= config.base_line + config.line_context;
@@ -84,6 +84,8 @@ fn main() -> Result<()> {
         true
     };
 
+    let out = io::stdout();
+    let mut writer = BufWriter::new(out.lock());
     config
         .files
         .iter()
@@ -95,8 +97,7 @@ fn main() -> Result<()> {
                     env::current_dir().unwrap().to_string_lossy()
                 )
             })?;
-            let mut w: Box<dyn std::io::Write> = Box::new(BufWriter::new(io::stdout()));
-            file::write_lines(&mut reader, &mut w, line_parse_func)?;
+            file::write_lines(&mut reader, &mut writer, line_parse_func)?;
             Ok(())
         })
         .unwrap_or_else(|err| {

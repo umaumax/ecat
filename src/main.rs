@@ -84,8 +84,7 @@ fn main() -> Result<()> {
         true
     };
 
-    let out = io::stdout();
-    let mut writer = BufWriter::new(out.lock());
+    let mut writer = BufWriter::new(io::stdout());
     config
         .files
         .iter()

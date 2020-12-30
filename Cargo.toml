@@ -17,3 +17,5 @@ ansi_term = "0.12.1"
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.8.14"
 dirs = "3.0.1"
+crossbeam = "0.8.0"
+crossbeam-channel = "0.5.0"

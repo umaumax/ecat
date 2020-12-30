@@ -1,6 +1,9 @@
 - name: text
   patterns: ["\"[^\"]*\"", "'[^\']*'"]
   color: "#ffff5f"
+- name: space_for_time
+  patterns: [" +"]
+  color: "#000000"
 - name: url
   patterns: ["[a-zA-z]+://[0-9a-zA-z._/]+", "[a-zA-z]+:[0-9a-zA-z._]+/[0-9a-zA-z._]+"]
   color: "175"

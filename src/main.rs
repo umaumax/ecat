@@ -1,6 +1,9 @@
 use std::env;
+use std::error::Error;
+use std::fmt;
 use std::io;
 use std::io::{BufWriter, Write};
+use std::path::Path;
 use std::process;
 
 use anyhow::{Context, Result};
@@ -15,13 +18,38 @@ fn main() -> Result<()> {
     let isatty: bool = atty::is(atty::Stream::Stdout);
     let color_flag: bool = config.color_when.mix_isatty_to_color_flag(isatty);
 
+    let config_filepath_list = vec![
+        dirs::home_dir().unwrap().join(".config/ecat/config.yaml"),
+        Path::new("./config.yaml").to_path_buf(),
+    ];
     let mut colorizer = app::Colorizer::new();
-    colorizer
-        .load_config_file("config.yaml")
-        .unwrap_or_else(|err| {
-            eprintln!("Problem while reading files: {}", err);
-            process::exit(1);
+
+    #[derive(Debug)]
+    struct SkipError;
+    impl fmt::Display for SkipError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(f, "SkipError")
+        }
+    }
+    impl Error for SkipError {}
+
+    config_filepath_list
+        .iter()
+        .try_for_each(|filepath| -> Result<(), Box<dyn std::error::Error>> {
+            if Path::new(filepath).exists() {
+                colorizer.load_config_file(filepath.to_str().unwrap())?;
+                return Err(Box::new(SkipError {}));
+            }
+            Ok(())
+        })
+        .unwrap_or_else(|e| match e {
+            e if e.downcast_ref::<SkipError>().is_some() => {}
+            _ => {
+                eprintln!("Problem while reading files: {}", e);
+                process::exit(1);
+            }
         });
+
     colorizer.setup();
     let line_parse_func = |outfile: &mut Box<dyn std::io::Write>, nr: i32, s: &String| -> bool {
         let output_flag = config.base_line <= 0

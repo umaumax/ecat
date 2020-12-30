@@ -72,7 +72,7 @@ pub fn build_app() -> clap::App<'static, 'static> {
         .unwrap();
 
     clap::App::new(program)
-        .about("original cat command by rust")
+        .about("enhanced cat command by rust")
         .version("0.0.1")
         .setting(clap::AppSettings::VersionlessSubcommands)
         .arg(clap::Arg::from_usage(

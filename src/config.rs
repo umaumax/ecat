@@ -50,10 +50,6 @@ pub fn parse_arg() -> Result<Config> {
         .unwrap()
         .map(String::from)
         .collect();
-    // NOTE: default input is stdin
-    if files.len() == 0 {
-        files.push(String::from("-"));
-    }
     let config = Config {
         base_line,
         line_context,
@@ -102,8 +98,8 @@ pub fn build_app() -> clap::App<'static, 'static> {
         ))
         .arg(
             clap::Arg::with_name("files")
-                .help("Sets the input file to use")
-                .required(true)
+                .help("Sets the input file to use (default is /dev/stdin)")
+                .default_value("-")
                 .multiple(true)
                 .index(1),
         )

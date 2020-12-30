@@ -60,6 +60,6 @@ e.g.
 * color code sheet: [https://upload\.wikimedia\.org/wikipedia/commons/1/15/Xterm\_256color\_chart\.svg]( https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.svg )
 
 ## TODO
-[ ] create test code
-[ ] refactor code
-[ ] attach default config.yaml
+* [ ] create test code
+* [ ] refactor code
+* [ ] attach default config.yaml

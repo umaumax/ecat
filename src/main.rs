@@ -19,8 +19,8 @@ fn main() -> Result<()> {
     let color_flag: bool = config.color_when.mix_isatty_to_color_flag(isatty);
 
     let config_filepath_list = vec![
-        dirs::home_dir().unwrap().join(".config/ecat/config.yaml"),
         Path::new("./config.yaml").to_path_buf(),
+        dirs::home_dir().unwrap().join(".config/ecat/config.yaml"),
     ];
     let mut colorizer = app::Colorizer::new();
 

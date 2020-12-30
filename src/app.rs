@@ -24,7 +24,7 @@ impl ColorPatternMap {
     }
 }
 pub fn process_color_pattern_maps(s: &str, patterns: &[ColorPatternMap]) -> String {
-    if patterns.len() == 0 {
+    if s.len() == 0 || patterns.len() == 0 {
         return String::from("");
     }
     let mut buf = vec![];
@@ -100,7 +100,6 @@ struct ColorPatternMapTemplate {
     color_set: ColorSet,
 }
 
-use serde::ser::SerializeStruct;
 impl Serialize for ColorSet {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

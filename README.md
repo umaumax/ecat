@@ -11,8 +11,9 @@ cargo install --git https://github.com/umaumax/ecat
 * no support to multi-line match
 
 ## how to run
+e.g.
 ```
-WIP
+ifconfig | ecat
 ```
 
 ## config file

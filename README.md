@@ -36,7 +36,7 @@ OPTIONS:
         --color <WHEN>       use markers to highlight the mathing strings; WHEN is [always], [never], or [auto]
         --config <STRING>    set config filepath
     -C, --context <NUM>      print NUM lines of output context
-        --line <NUM>         print taeget line of output context
+        --line <NUM>         print target line of output context
 
 ARGS:
     <files>...    Sets the input file to use (default is /dev/stdin) [default: -]

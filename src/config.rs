@@ -82,7 +82,7 @@ pub fn build_app() -> clap::App<'static, 'static> {
         ))
         .arg(clap::Arg::from_usage(
             "--line=[NUM] \
-            'print taeget line of output context;",
+            'print target line of output context;",
         ))
         .arg(clap::Arg::from_usage(
             "-C --context=[NUM] \

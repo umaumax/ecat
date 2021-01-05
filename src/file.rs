@@ -76,7 +76,7 @@ where
             match r.read_line(&mut s) {
                 Ok(0) => break, // EOF
                 Ok(_) => {
-                    let mut w = &mut *main_writer.lock().unwrap();
+                    let mut w = &mut *(main_writer.lock().unwrap());
                     let ret = f(&mut w, nr, &s);
                     s.clear();
                     if !ret {

@@ -34,7 +34,7 @@ pub fn write_lines<F>(
     f: F,
 ) -> Result<(), io::Error>
 where
-    F: Fn(&mut dyn std::io::Write, i32, &String) -> bool,
+    F: Fn(&mut dyn std::io::Write, i32, &String) -> Result<bool, io::Error>,
 {
     let mut s = String::new();
 
@@ -45,26 +45,34 @@ where
         let sub_writer = writer.clone();
 
         let handle = scope.spawn(move |_| {
-            let mut start = Instant::now();
-            let flush_interval = Duration::from_millis(100);
-            let flush_timeout_th = Duration::from_millis(10);
-            loop {
-                match rx.recv_timeout(flush_timeout_th) {
-                    Err(RecvTimeoutError::Timeout) => {
+            match move || -> Result<(), io::Error> {
+                let mut start = Instant::now();
+                let flush_interval = Duration::from_millis(100);
+                let flush_timeout_th = Duration::from_millis(10);
+                loop {
+                    match rx.recv_timeout(flush_timeout_th) {
+                        Err(RecvTimeoutError::Timeout) => {
+                            let mut sub_writer = sub_writer.lock().unwrap();
+                            sub_writer.flush()?;
+                        }
+                        Err(RecvTimeoutError::Disconnected) => {
+                            break;
+                        }
+                        Ok(_) => { /* nothing to do */ }
+                    }
+                    let now = start.elapsed();
+                    if now >= flush_interval {
+                        start = Instant::now();
                         let mut sub_writer = sub_writer.lock().unwrap();
-                        sub_writer.flush().unwrap();
+                        sub_writer.flush()?;
                     }
-                    Err(RecvTimeoutError::Disconnected) => {
-                        break;
-                    }
-                    Ok(_) => { /* nothing to do */ }
                 }
-                let now = start.elapsed();
-                if now >= flush_interval {
-                    start = Instant::now();
-                    let mut sub_writer = sub_writer.lock().unwrap();
-                    sub_writer.flush().unwrap();
-                }
+                drop(rx);
+                Ok(())
+            }() {
+                Ok(_) => {}
+                Err(err) if err.kind() == std::io::ErrorKind::BrokenPipe => { /* ignore error */ }
+                Err(err) => panic!(err),
             }
         });
 
@@ -77,12 +85,27 @@ where
                 Ok(0) => break, // EOF
                 Ok(_) => {
                     let mut w = &mut *(main_writer.lock().unwrap());
-                    let ret = f(&mut w, nr, &s);
+                    let line_func_ret = f(&mut w, nr, &s);
                     s.clear();
-                    if !ret {
-                        break;
+                    match line_func_ret {
+                        Ok(false) => {
+                            break;
+                        }
+                        Ok(true) => {}
+                        Err(err) if err.kind() == std::io::ErrorKind::BrokenPipe => {}
+                        Err(err) => {
+                            ret_val = Err(err);
+                            break;
+                        }
                     }
-                    tx.send(true).unwrap();
+                    match tx.send(true) {
+                        Ok(_) => {}
+                        Err(err) => {
+                            #[cfg(debug_assertions)]
+                            eprintln!("{:?}", err);
+                            break;
+                        }
+                    }
                 }
                 Err(err) => {
                     ret_val = Err(err);

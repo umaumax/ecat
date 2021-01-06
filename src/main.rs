@@ -54,35 +54,36 @@ fn main() -> Result<()> {
         });
 
     colorizer.setup();
-    let line_parse_func = |outfile: &mut dyn std::io::Write, nr: i32, s: &String| -> bool {
-        let output_flag = config.base_line <= 0
-            || config.base_line - config.line_context <= nr
-                && nr <= config.base_line + config.line_context;
-        if output_flag {
-            let mut prefix = "";
-            let mut suffix = "";
-            if config.base_line == nr && color_flag {
-                prefix = "\x1b[32m"; // NOTE: green
-                suffix = "\x1b[m";
+    let line_parse_func =
+        |outfile: &mut dyn std::io::Write, nr: i32, s: &String| -> Result<bool, io::Error> {
+            let output_flag = config.base_line <= 0
+                || config.base_line - config.line_context <= nr
+                    && nr <= config.base_line + config.line_context;
+            if output_flag {
+                let mut prefix = "";
+                let mut suffix = "";
+                if config.base_line == nr && color_flag {
+                    prefix = "\x1b[32m"; // NOTE: green
+                    suffix = "\x1b[m";
+                }
+                outfile.write((format!("{}", prefix)).as_bytes())?;
+                if config.line_number {
+                    outfile.write((format!("{:>6} ", nr)).as_bytes())?;
+                }
+                if color_flag {
+                    let output = colorizer.colorize(s);
+                    outfile.write(output.as_bytes())?;
+                } else {
+                    outfile.write(s.as_bytes())?;
+                }
+                outfile.write((format!("{}", suffix)).as_bytes())?;
             }
-            outfile.write((format!("{}", prefix)).as_bytes()).unwrap();
-            if config.line_number {
-                outfile.write((format!("{:>6} ", nr)).as_bytes()).unwrap();
+            // NOTE: skip rest of the file
+            if config.base_line > 0 && nr == config.base_line + config.line_context {
+                return Ok(false);
             }
-            if color_flag {
-                let output = colorizer.colorize(s);
-                outfile.write(output.as_bytes()).unwrap();
-            } else {
-                outfile.write(s.as_bytes()).unwrap();
-            }
-            outfile.write((format!("{}", suffix)).as_bytes()).unwrap();
-        }
-        // NOTE: skip rest of the file
-        if config.base_line > 0 && nr == config.base_line + config.line_context {
-            return false;
-        }
-        true
-    };
+            Ok(true)
+        };
 
     let mut writer = BufWriter::new(io::stdout());
     config

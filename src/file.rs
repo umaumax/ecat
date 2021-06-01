@@ -72,7 +72,7 @@ where
             }() {
                 Ok(_) => {}
                 Err(err) if err.kind() == std::io::ErrorKind::BrokenPipe => { /* ignore error */ }
-                Err(err) => panic!(err),
+                Err(err) => panic!("{}", err),
             }
         });
 

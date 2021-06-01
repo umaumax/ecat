@@ -28,6 +28,13 @@ pub fn get_buf_reader_safe(file: &str) -> Result<BufReader<Box<dyn std::io::Read
     Ok(BufReader::new(reader))
 }
 
+fn lossy_read_line(r: &mut dyn std::io::BufRead, buf: &mut String) -> std::io::Result<usize> {
+    let mut byte_buf = vec![];
+    let num_bytes = r.read_until(b'\n', &mut byte_buf)?;
+    *buf = String::from_utf8_lossy(&byte_buf).into_owned();
+    Ok(num_bytes)
+}
+
 pub fn write_lines<F>(
     r: &mut dyn std::io::BufRead,
     w: &mut (dyn std::io::Write + Send),
@@ -81,7 +88,8 @@ where
         let mut ret_val: Result<(), io::Error> = Ok(());
         let mut nr = 1;
         loop {
-            match r.read_line(&mut s) {
+            // NOTE: read_line cause error when input text is invalid UTF-8
+            match lossy_read_line(r, &mut s) {
                 Ok(0) => break, // EOF
                 Ok(_) => {
                     let mut w = &mut *(main_writer.lock().unwrap());

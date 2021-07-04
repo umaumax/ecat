@@ -90,7 +90,8 @@ fn main() -> Result<()> {
         .files
         .iter()
         .try_for_each(|filename| -> Result<()> {
-            let mut reader = file::get_buf_reader_safe(filename).with_context(|| {
+            let stdin = std::io::stdin();
+            let mut reader = file::Input::console_or_file(&stdin, filename).with_context(|| {
                 format!(
                     "while opening file '{}' at {}",
                     filename,

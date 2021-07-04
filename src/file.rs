@@ -1,11 +1,47 @@
 use std::fs::File;
-use std::io;
 use std::io::BufReader;
+use std::io::{self, BufRead, Read};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 use anyhow::Result;
 use crossbeam_channel::{unbounded, RecvTimeoutError};
+
+pub struct Input<'a> {
+    source: Box<dyn BufRead + 'a>,
+}
+impl<'a> Input<'a> {
+    pub fn console(stdin: &'a io::Stdin) -> io::Result<Input<'a>> {
+        Ok(Input {
+            source: Box::new(stdin.lock()),
+        })
+    }
+    pub fn file(path: &str) -> io::Result<Input<'a>> {
+        File::open(path).map(|file| Input {
+            source: Box::new(io::BufReader::new(file)),
+        })
+    }
+
+    pub fn console_or_file(stdin: &'a io::Stdin, path: &str) -> io::Result<Input<'a>> {
+        match path {
+            "-" => Input::console(stdin),
+            _ => Input::file(path),
+        }
+    }
+}
+impl<'a> Read for Input<'a> {
+    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+        self.source.read(buf)
+    }
+}
+impl<'a> BufRead for Input<'a> {
+    fn fill_buf(&mut self) -> io::Result<&[u8]> {
+        self.source.fill_buf()
+    }
+    fn consume(&mut self, amt: usize) {
+        self.source.consume(amt);
+    }
+}
 
 pub fn get_buf_reader(file: &str) -> BufReader<Box<dyn std::io::Read>> {
     let read: Box<dyn std::io::Read> = match file {

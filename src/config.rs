@@ -35,14 +35,14 @@ pub fn parse_arg() -> Result<Config> {
         .value_of("line")
         .unwrap_or("0")
         .parse::<i32>()
-        .with_context(|| format!("failed parse --line option"))?;
+        .with_context(|| "failed parse --line option")?;
     let line_context = matches
         .value_of("context")
         .unwrap_or("3")
         .parse::<i32>()
-        .with_context(|| format!("failed parse -C, --context option"))?;
+        .with_context(|| "failed parse -C, --context option")?;
     let color_when = ColorWhen::from_str(matches.value_of("color").unwrap_or("auto"))
-        .with_context(|| format!("failed parse --color option"))?;
+        .with_context(|| "failed parse --color option")?;
     let config_file = matches.value_of("config").unwrap_or("").to_string();
     let line_number = matches.is_present("n");
     let files: Vec<String> = matches
@@ -58,12 +58,12 @@ pub fn parse_arg() -> Result<Config> {
         line_number,
         files,
     };
-    return Ok(config);
+    Ok(config)
 }
 
 pub fn build_app() -> clap::App<'static, 'static> {
     let program = std::env::args()
-        .nth(0)
+        .next()
         .and_then(|s| {
             std::path::PathBuf::from(s)
                 .file_stem()

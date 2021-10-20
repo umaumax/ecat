@@ -22,7 +22,7 @@ fn main() -> Result<()> {
         Path::new("./config.yaml").to_path_buf(),
         dirs::home_dir().unwrap().join(".config/ecat/config.yaml"),
     ];
-    if config.config_file.len() > 0 {
+    if config.config_file.is_empty() {
         config_filepath_list.insert(0, Path::new(&config.config_file).to_path_buf());
     }
     let mut colorizer = app::Colorizer::new();
@@ -66,17 +66,17 @@ fn main() -> Result<()> {
                     prefix = "\x1b[32m"; // NOTE: green
                     suffix = "\x1b[m";
                 }
-                outfile.write((format!("{}", prefix)).as_bytes())?;
+                outfile.write_all(prefix.to_string().as_bytes())?;
                 if config.line_number {
-                    outfile.write((format!("{:>6} ", nr)).as_bytes())?;
+                    outfile.write_all((format!("{:>6} ", nr)).as_bytes())?;
                 }
                 if color_flag {
                     let output = colorizer.colorize(s);
-                    outfile.write(output.as_bytes())?;
+                    outfile.write_all(output.as_bytes())?;
                 } else {
-                    outfile.write(s.as_bytes())?;
+                    outfile.write_all(s.as_bytes())?;
                 }
-                outfile.write((format!("{}", suffix)).as_bytes())?;
+                outfile.write_all(suffix.to_string().as_bytes())?;
             }
             // NOTE: skip rest of the file
             if config.base_line > 0 && nr == config.base_line + config.line_context {

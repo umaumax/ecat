@@ -19,12 +19,12 @@ impl ColorPatternMap {
             name: name.to_string(),
             pattern: pattern.to_string(),
             regex_pattern: Regex::new(&pattern).unwrap(),
-            color: color,
+            color,
         }
     }
 }
 pub fn process_color_pattern_maps(s: &str, patterns: &[ColorPatternMap]) -> String {
-    if s.len() == 0 || patterns.len() == 0 {
+    if s.is_empty() || patterns.is_empty() {
         return String::from("");
     }
     let mut buf = vec![];
@@ -44,25 +44,25 @@ pub fn process_color_pattern_maps(s: &str, patterns: &[ColorPatternMap]) -> Stri
 
             if patterns.len() > 1 {
                 let ret = process_color_pattern_maps(word, &patterns[1..]);
-                f.write(ret.as_bytes()).unwrap();
+                f.write_all(ret.as_bytes()).unwrap();
             } else {
                 // nothing match
-                f.write(word.as_bytes()).unwrap();
+                f.write_all(word.as_bytes()).unwrap();
             }
 
-            if target_word.len() > 0 {
+            if !target_word.is_empty() {
                 let prefix = color_pattern_map.color.prefix().to_string();
                 let suffix = color_pattern_map.color.suffix().to_string();
-                f.write(prefix.as_bytes()).unwrap();
-                f.write(target_word.as_bytes()).unwrap();
-                f.write(suffix.as_bytes()).unwrap();
+                f.write_all(prefix.as_bytes()).unwrap();
+                f.write_all(target_word.as_bytes()).unwrap();
+                f.write_all(suffix.as_bytes()).unwrap();
             }
         }
     }
-    let output = std::str::from_utf8(&buf).unwrap().to_string();
-    return output;
+    std::str::from_utf8(&buf).unwrap().to_string()
 }
 
+#[derive(Default)]
 pub struct Colorizer {
     color_pattern_map_data_list: Vec<ColorPatternMapTemplate>,
     pub color_pattern_maps: Vec<ColorPatternMap>,
@@ -75,7 +75,7 @@ pub struct ColorSet {
 impl ColorSet {
     pub fn new(name: &str) -> Self {
         let color = match name {
-            name if name.starts_with("#") => {
+            name if name.starts_with('#') => {
                 let r = u8::from_str_radix(&name[1..3], 16).unwrap();
                 let g = u8::from_str_radix(&name[3..5], 16).unwrap();
                 let b = u8::from_str_radix(&name[5..7], 16).unwrap();
@@ -84,11 +84,10 @@ impl ColorSet {
             name if name.parse::<i32>().is_ok() => ansi_term::Color::Fixed(name.parse().unwrap()),
             _ => ansi_term::Color::Fixed(7),
         };
-        let color_set = ColorSet {
+        ColorSet {
             name: name.to_string(),
-            color: color,
-        };
-        return color_set;
+            color,
+        }
     }
 }
 
@@ -105,7 +104,7 @@ impl Serialize for ColorSet {
     where
         S: serde::Serializer,
     {
-        format!("{}", self.name).serialize(serializer)
+        self.name.to_string().serialize(serializer)
     }
 }
 
@@ -148,11 +147,10 @@ impl Colorizer {
         ];
 
         let color_pattern_maps: Vec<ColorPatternMap> = vec![];
-        let colorizer = Colorizer {
+        Colorizer {
             color_pattern_map_data_list,
             color_pattern_maps,
-        };
-        return colorizer;
+        }
     }
     pub fn setup(&mut self) {
         self.color_pattern_map_data_list
@@ -172,6 +170,6 @@ impl Colorizer {
         }
     }
     pub fn colorize(&self, s: &str) -> String {
-        return process_color_pattern_maps(s, &self.color_pattern_maps);
+        process_color_pattern_maps(s, &self.color_pattern_maps)
     }
 }

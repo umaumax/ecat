@@ -120,7 +120,7 @@ impl<'de> Deserialize<'de> for ColorSet {
 }
 
 impl Colorizer {
-    pub fn load_config_file(&mut self, filepath: &str) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn load_config_file(&mut self, filepath: &str) -> Result<()> {
         let f = std::fs::File::open(filepath)?;
         let mut color_pattern_map_data_list: Vec<ColorPatternMapTemplate> =
             serde_yaml::from_reader(f)?;

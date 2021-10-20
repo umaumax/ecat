@@ -123,9 +123,9 @@ where
                     }
                     match tx.send(true) {
                         Ok(_) => {}
-                        Err(err) => {
+                        Err(_err) => {
                             #[cfg(debug_assertions)]
-                            eprintln!("{:?}", err);
+                            eprintln!("{:?}", _err);
                             break;
                         }
                     }

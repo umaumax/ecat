@@ -11,6 +11,7 @@ cargo install --git https://github.com/umaumax/ecat
 
 ## NOTE
 * no support to multi-line match
+* `function|func` matches `func` only (This is a specification of regular expressions.)
 
 ## how to run
 e.g.

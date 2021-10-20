@@ -43,27 +43,6 @@ impl<'a> BufRead for Input<'a> {
     }
 }
 
-pub fn get_buf_reader(file: &str) -> BufReader<Box<dyn std::io::Read>> {
-    let read: Box<dyn std::io::Read> = match file {
-        "-" => Box::new(io::stdin()),
-        _ => Box::new(File::open(file).expect(&(format!("Error opening {} file", file)))),
-    };
-    BufReader::new(read)
-}
-
-pub fn get_buf_reader_safe(file: &str) -> Result<BufReader<Box<dyn std::io::Read>>> {
-    let reader: Box<dyn std::io::Read> = match file {
-        "-" => Box::new(io::stdin()),
-        _ => {
-            if std::path::Path::new(file).is_dir() {
-                return Err(anyhow!("{} is a directory, not a file", file));
-            }
-            Box::new(File::open(file)?)
-        }
-    };
-    Ok(BufReader::new(reader))
-}
-
 fn lossy_read_line(r: &mut dyn std::io::BufRead, buf: &mut String) -> std::io::Result<usize> {
     let mut byte_buf = vec![];
     let num_bytes = r.read_until(b'\n', &mut byte_buf)?;

@@ -1,20 +1,19 @@
 [package]
 name = "ecat"
 version = "0.1.0"
-authors = ["umaumax <umauma7083@gmail.com>"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
-anyhow = "1.0.35"
+anyhow = "1.0.55"
 atty = "0.2.14"
-clap = "2.33.3"
-strum = "0.20.0"
-strum_macros = "0.20.1"
-regex = "1.4.2"
+clap = "3.1.5"
+strum = "0.24.0"
+strum_macros = "0.24.0"
+regex = "1.5.4"
 ansi_term = "0.12.1"
-serde = { version = "1.0", features = ["derive"] }
-serde_yaml = "0.8.14"
-dirs = "3.0.1"
-crossbeam = "0.8.0"
-crossbeam-channel = "0.5.0"
+serde = { version = "1.0.136", features = ["derive"] }
+serde_yaml = "0.8.23"
+dirs = "4.0.0"
+crossbeam = "0.8.1"
+crossbeam-channel = "0.5.2"
